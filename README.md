@@ -40,6 +40,7 @@ Paths are relative to the caller's current directory.
 ```sh
 empeira addon convert run -i input.json -o output.yaml
 empeira addon convert run -i input.xml -o output.json
+empeira addon convert run -i hiera.yaml -t xml
 empeira addon convert run -i input.properties -o output.yaml
 empeira addon convert run -i input.yaml -t puppet-hash
 empeira addon convert run -i data.txt -f json -t yaml
@@ -116,7 +117,7 @@ the result with `puppet epp validate settings.epp` and render it with
 - Common data consists of string-keyed mappings, arrays, strings, finite numbers,
   booleans and null. YAML object tags, aliases and implicit date objects are not
   supported; quote dates to treat them as strings. Use one YAML document.
-- XML output requires exactly one top-level mapping key and XML-compatible element names. For Hiera data with multiple root keys, wrap it under a single `hiera:` key first. Puppet namespaced keys (`::`) are not valid XML element names. The CLI explains these limitations in its errors.
+- XML output wraps ordinary Hiera mappings (multiple top-level keys) automatically under a `hiera` root. Keys incompatible with XML element names, including Puppet `::` names, are encoded as `empeira_key_<hex>` and decoded when converted back using this addon. The added root remains visible on XML-to-YAML conversion; it is not stripped automatically.
 - XML preserves the root as a mapping key, attributes as `@name`, text alongside
   attributes as `#text`, and repeated elements as arrays. Text stays string data;
   for example `<settings><port>8080</port></settings>` becomes
