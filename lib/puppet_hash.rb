@@ -8,10 +8,11 @@ module PuppetHash
   module_function
 
   def quote(value)
-    escaped = value.each_char.map do |char|
+    escaped = value.each_char.with_index.map do |char, index|
       case char
       when '"', '\\', '$' then "\\#{char}"
-      when '%', /[[:cntrl:]]/ then format('\\u%04x', char.ord)
+      when '%' then value[index + 1] == '>' ? '\\u0025' : '%'
+      when /[[:cntrl:]]/ then format('\\u%04x', char.ord)
       else char
       end
     end.join
