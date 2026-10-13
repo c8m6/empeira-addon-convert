@@ -12,7 +12,7 @@ add this entry to the existing `.empeira.yaml`:
 addons:
   convert:
     git: https://github.com/c8m6/empeira-addon-convert.git
-    ref: main
+    ref: v1.0.1
 ```
 
 When a version tag is published, GitHub Actions opens a pull request to update
