@@ -15,8 +15,10 @@ addons:
     ref: main
 ```
 
-The `ref` above is automatically updated to the newest version tag when one is
-published. Until the first tag exists, it remains `main`.
+When a version tag is published, GitHub Actions opens a pull request to update
+this `ref` to the latest tag. Because `main` is protected, the change takes effect
+after the pull request is merged. Until then, the documented ref may remain `main`
+or point to an earlier release.
 
 Run `empeira addons sync`, then `empeira addon convert --help`.
 `empeira addons update` refreshes the configured Git ref. Use a commit instead of
