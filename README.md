@@ -15,6 +15,9 @@ addons:
     ref: main
 ```
 
+The `ref` above is automatically updated to the newest version tag when one is
+published. Until the first tag exists, it remains `main`.
+
 Run `empeira addons sync`, then `empeira addon convert --help`.
 `empeira addons update` refreshes the configured Git ref. Use a commit instead of
 `main` when you need reproducible versions. Empeira also installs a missing addon
