@@ -41,6 +41,16 @@ Dir.mktmpdir('empeira-convert-test') do |directory|
     assert(Convert.read(Convert.write(parsed, 'xml'), 'xml') == expected)
   end
 
+  check('Hiera YAML -> XML and back') do
+    hiera = { 'profile::server::port' => 8080, 'enabled' => true }
+    yaml = File.join(directory, 'hiera.yaml')
+    File.write(yaml, YAML.dump(hiera))
+    stdout, stderr, status = cli('-i', yaml, '-t', 'XML')
+    assert(status.success?, stderr)
+    assert(Convert.read(stdout, 'xml') == { 'hiera' => hiera }, stdout)
+    assert(stdout.include?('<hiera>'))
+  end
+
   check('Properties -> YAML and Properties output') do
     source = "# comment\nhost=localhost\nport: 8080\nhello\\ world = a\\\n  b\nname=Gr\\u00fcße\n"
     parsed = Convert.read(source, 'properties')
