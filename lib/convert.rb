@@ -204,7 +204,9 @@ module Convert
     parameters.each_with_index do |(name, value), index|
       marker = "#{prefix}#{index}END"
       token = %w[json puppet-hash].include?(format) ? "\"#{marker}\"" : marker
-      body = body.gsub(token) { "<%= #{template_expression(name, value, format)} %>" }
+      interpolation = "<%= $#{name} %>"
+      interpolation = "\"#{interpolation}\"" if value.is_a?(String) && %w[yaml json puppet-hash].include?(format)
+      body = body.gsub(token) { interpolation }
     end
     return body if parameters.empty?
 
@@ -235,27 +237,4 @@ module Convert
     end
   end
 
-  def template_expression(name, value, format)
-    expression = "$#{name}"
-    return expression unless value.is_a?(String)
-
-    if value.match?(/[\x00-\x07\x0b\x0e-\x1f]/)
-      raise ArgumentError, 'Template strings contain unsupported control characters'
-    end
-
-    # Use only Puppet's built-in regsubst; no stdlib module is needed to render.
-    escapes = case format
-              when 'xml' then { '&' => '&amp;', '<' => '&lt;', '>' => '&gt;', '"' => '&quot;', "'" => '&apos;' }
-              when 'properties'
-                { '\\' => '\\\\', "\n" => '\\n', "\r" => '\\r', "\t" => '\\t', "\f" => '\\f', ' ' => '\\ ' }
-              else
-                { '\\' => '\\\\', '"' => '\\"', "\n" => '\\n', "\r" => '\\r', "\t" => '\\t', "\b" => '\\u0008', "\f" => '\\u000c' }
-              end
-    escapes['$'] = '\\$' if format == 'puppet-hash'
-    escapes.each do |char, replacement|
-      replacement = replacement.gsub('\\') { '\\\\' }
-      expression = "regsubst(#{expression}, #{PuppetHash.quote(Regexp.escape(char))}, #{PuppetHash.quote(replacement)}, 'G')"
-    end
-    %w[yaml json puppet-hash].include?(format) ? "sprintf('\"%s\"', #{expression})" : expression
-  end
 end
