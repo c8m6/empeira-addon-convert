@@ -101,6 +101,9 @@ Dir.mktmpdir('empeira-convert-test') do |directory|
     assert(template.include?('$a_b_0 = 1') && template.include?('$a_b_0_2 = 2'))
     assert(template.include?('\\u0025>') && template.include?('\\$x'))
     assert(Convert.template({ 'x' => nil }, 'yaml') == YAML.dump('x' => nil))
+    assert(template.include?('"<%= $text %>"'))
+    assert(!template.include?('regsubst('))
+    assert(Convert.template({ 'glob' => '%{facts.os.name}' }, 'yaml').include?('"%{facts.os.name}"'))
 
     puppet = ENV.fetch('PATH', '').split(File::PATH_SEPARATOR).map { |path| File.join(path, 'puppet') }.find { |path| File.executable?(path) && File.file?(path) }
     if puppet
