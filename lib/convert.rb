@@ -116,7 +116,7 @@ module Convert
     document = REXML::Document.new(source)
     raise ArgumentError, 'XML requires one root element' unless document.root
 
-    { document.root.name => xml_value(document.root) }
+    { xml_decode_name(document.root.name) => xml_value(document.root) }
   rescue REXML::ParseException => e
     raise ArgumentError, "Invalid XML: #{e.message.lines.first.strip}"
   end
@@ -134,7 +134,8 @@ module Convert
     result['#text'] = text if children.empty? && !text.empty?
     children.group_by(&:name).each do |name, entries|
       values = entries.map { |child| xml_value(child) }
-      result[name] = values.length == 1 ? values.first : values
+      key = xml_decode_name(name)
+      result[key] = values.length == 1 ? values.first : values
     end
     result
   end
@@ -152,9 +153,15 @@ module Convert
     "#{output}\n"
   end
 
-  def xml_element(parent, name, value)
-    raise ArgumentError, "Invalid XML element name #{name.inspect}: XML keys cannot contain Puppet namespace separators (::), spaces or other invalid name characters. Rename or restructure the key before converting" unless name.match?(/\A[a-zA-Z_][a-zA-Z0-9_.-]*\z/)
+  def xml_decode_name(name)
+    match = /\Aempeira_key_([0-9a-f]+)\z/.match(name)
+    match ? [match[1]].pack('H*').force_encoding('UTF-8') : name
+  end
 
+  def xml_element(parent, name, value)
+    unless name.match?(/\A[a-zA-Z_][a-zA-Z0-9_.-]*\z/) && !name.start_with?('empeira_key_')
+      name = "empeira_key_#{name.unpack1('H*')}"
+    end
     element = parent.add_element(name)
     if value.is_a?(Hash)
       value.each do |key, child|
