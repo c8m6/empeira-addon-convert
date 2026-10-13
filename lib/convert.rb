@@ -141,7 +141,7 @@ module Convert
 
   def write_xml(data)
     unless data.is_a?(Hash) && data.size == 1 && !data.values.first.is_a?(Array)
-      raise ArgumentError, 'XML requires a mapping with exactly one root element'
+      raise ArgumentError, 'XML output needs exactly one root key (for example, wrap Hiera data under a top-level `hiera:` key). YAML with multiple top-level keys cannot be written directly as XML'
     end
 
     document = REXML::Document.new
@@ -152,7 +152,7 @@ module Convert
   end
 
   def xml_element(parent, name, value)
-    raise ArgumentError, "Invalid XML name: #{name.inspect}" unless name.match?(/\A[a-zA-Z_][a-zA-Z0-9_.-]*\z/)
+    raise ArgumentError, "Invalid XML element name #{name.inspect}: XML keys cannot contain Puppet namespace separators (::), spaces or other invalid name characters. Rename or restructure the key before converting" unless name.match?(/\A[a-zA-Z_][a-zA-Z0-9_.-]*\z/)
 
     element = parent.add_element(name)
     if value.is_a?(Hash)
