@@ -15,10 +15,9 @@ addons:
     ref: main
 ```
 
-When a version tag is published, GitHub Actions opens a pull request to update
-this `ref` to the latest tag. Because `main` is protected, the change takes effect
-after the pull request is merged. Until then, the documented ref may remain `main`
-or point to an earlier release.
+For a reproducible installation, replace `main` with a tag from the
+[latest GitHub release](https://github.com/c8m6/empeira-addon-convert/releases/latest).
+The README is not modified automatically when publishing a release.
 
 Run `empeira addons sync`, then `empeira addon convert --help`.
 `empeira addons update` refreshes the configured Git ref. Use a commit instead of
