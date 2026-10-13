@@ -41,9 +41,9 @@ begin
 rescue LoadError => e
   dependency = e.path.to_s.split('/').first
   dependency = 'psych' if dependency == 'yaml'
-  warn "Error: Missing Ruby dependency: #{dependency}\nInstall it using:\n  gem install #{dependency}"
+  $stderr.puts "Error: Missing Ruby dependency: #{dependency}\nInstall it using:\n  gem install #{dependency}"
   exit 1
 rescue StandardError => e
-  warn "Error: #{e.message}"
+  $stderr.puts "Error: #{e.class}: #{e.message}"
   exit 1
 end
