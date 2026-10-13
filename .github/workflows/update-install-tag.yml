@@ -1,9 +1,9 @@
 name: Update installation tag
 
 on:
-  push:
-    tags:
-      - '**'
+  release:
+    types: [published]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -23,9 +23,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          tag="$(git tag --list 'v[0-9]*' --sort=-version:refname | head -n 1)"
+          tag="$(git tag --list 'v[0-9]*' --sort=-version:refname | sed -n '1p')"
           if [ -z "$tag" ]; then
-            tag="$(git tag --sort=-version:refname | head -n 1)"
+            tag="$(git tag --sort=-version:refname | sed -n '1p')"
           fi
           [ -n "$tag" ] || exit 0
 
@@ -55,6 +55,9 @@ jobs:
           git switch -c "$branch"
           git add README.md
           git commit -m "docs: point installation to $tag"
+          if git ls-remote --exit-code --heads origin "$branch" >/dev/null 2>&1; then
+            git fetch origin "$branch"
+          fi
           git push --force-with-lease origin "$branch"
           if ! gh pr list --head "$branch" --state open --json number --jq '.[0].number' | grep -q .; then
             gh pr create --base main --head "$branch" \
