@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   readme:
@@ -16,8 +17,9 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
-          persist-credentials: true
-      - name: Update README installation reference
+      - name: Open README update pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
@@ -25,9 +27,8 @@ jobs:
           if [ -z "$tag" ]; then
             tag="$(git tag --sort=-version:refname | head -n 1)"
           fi
-          if [ -z "$tag" ]; then
-            exit 0
-          fi
+          [ -n "$tag" ] || exit 0
+
           LATEST_TAG="$tag" python3 - <<'PY'
           from pathlib import Path
           import os
@@ -37,7 +38,7 @@ jobs:
           original = path.read_text()
           updated, count = re.subn(
               r"(?m)^(    ref: )[^\n]+$",
-              lambda m: m.group(1) + os.environ["LATEST_TAG"],
+              lambda match: match.group(1) + os.environ["LATEST_TAG"],
               original,
               count=1,
           )
@@ -46,11 +47,17 @@ jobs:
           if updated != original:
               path.write_text(updated)
           PY
-          if git diff --quiet -- README.md; then
-            exit 0
-          fi
+
+          git diff --quiet -- README.md && exit 0
+          branch="docs/install-ref-${tag//[^a-zA-Z0-9._-]/-}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
           git add README.md
-          git commit -m "docs: point installation to latest tag"
-          git push origin HEAD:main
+          git commit -m "docs: point installation to $tag"
+          git push --force-with-lease origin "$branch"
+          if ! gh pr list --head "$branch" --state open --json number --jq '.[0].number' | grep -q .; then
+            gh pr create --base main --head "$branch" \
+              --title "docs: point installation to $tag" \
+              --body "Automatically generated installation reference update for the latest tag. Requires normal review/merge because main is protected."
+          fi
