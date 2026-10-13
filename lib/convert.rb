@@ -140,12 +140,13 @@ module Convert
   end
 
   def write_xml(data)
-    unless data.is_a?(Hash) && data.size == 1 && !data.values.first.is_a?(Array)
-      raise ArgumentError, 'XML output needs exactly one root key (for example, wrap Hiera data under a top-level `hiera:` key). YAML with multiple top-level keys cannot be written directly as XML'
-    end
+    raise ArgumentError, 'XML output requires a mapping' unless data.is_a?(Hash)
 
+    # Keep a valid existing XML root; wrap ordinary Hiera mappings automatically.
+    root = data.size == 1 && !data.values.first.is_a?(Array) &&
+           data.keys.first.match?(/\A[a-zA-Z_][a-zA-Z0-9_.-]*\z/) ? data : { 'hiera' => data }
     document = REXML::Document.new
-    xml_element(document, *data.first)
+    xml_element(document, *root.first)
     output = +''
     REXML::Formatters::Default.new.write(document, output)
     "#{output}\n"
