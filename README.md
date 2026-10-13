@@ -38,11 +38,11 @@ Paths are relative to the caller's current directory.
 | Puppet hash | `.pp` | Yes / yes |
 
 ```sh
-empeira addon convert -i input.json -o output.yaml
-empeira addon convert -i input.xml -o output.json
-empeira addon convert -i input.properties -o output.yaml
-empeira addon convert -i input.yaml -t puppet-hash
-empeira addon convert -i data.txt -f json -t yaml
+empeira addon convert run -i input.json -o output.yaml
+empeira addon convert run -i input.xml -o output.json
+empeira addon convert run -i input.properties -o output.yaml
+empeira addon convert run -i input.yaml -t puppet-hash
+empeira addon convert run -i data.txt -f json -t yaml
 ```
 
 | Option | Meaning |
@@ -52,6 +52,9 @@ empeira addon convert -i data.txt -f json -t yaml
 | `-f`, `--input-format FORMAT` | Override input filename detection |
 | `-t`, `--output-format FORMAT` | Override output filename detection |
 | `-h`, `--help` | Show usage |
+
+Use `run` for argument and format autocompletion; the old direct form without
+`run` still works. Both `run --help` and `--help` list valid formats and examples.
 
 Format names are `yaml`, `json`, `xml`, `properties`, `puppet-hash`; `yml` and
 `pp` also work. Without an output file or format, output is YAML on stdout.
@@ -113,6 +116,7 @@ the result with `puppet epp validate settings.epp` and render it with
 - Common data consists of string-keyed mappings, arrays, strings, finite numbers,
   booleans and null. YAML object tags, aliases and implicit date objects are not
   supported; quote dates to treat them as strings. Use one YAML document.
+- XML output requires exactly one top-level mapping key and XML-compatible element names. For Hiera data with multiple root keys, wrap it under a single `hiera:` key first. Puppet namespaced keys (`::`) are not valid XML element names. The CLI explains these limitations in its errors.
 - XML preserves the root as a mapping key, attributes as `@name`, text alongside
   attributes as `#text`, and repeated elements as arrays. Text stays string data;
   for example `<settings><port>8080</port></settings>` becomes
@@ -148,8 +152,8 @@ anything or requests root access. It introduces no third-party parser gems.
 Run `ruby test/convert_test.rb` for eight focused checks, plus the syntax checks
 in [CONTRIBUTING.md](CONTRIBUTING.md). CI uses Ruby 3.4 without a test matrix or
 Bundler. Empeira API 1 can describe subcommand completion but has no root-option
-schema; the manifest therefore describes `template` only. Root conversion options
-are still accepted and listed by `--help`.
+schema; therefore `run` exposes conversion options for completion. The old root
+conversion syntax remains supported.
 
 Questions: [Empeira Discussions](https://github.com/c8m6/empeira/discussions).
 Security reports: [SECURITY.md](SECURITY.md).
