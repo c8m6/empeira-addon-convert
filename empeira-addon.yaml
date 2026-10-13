@@ -1,0 +1,25 @@
+schema: 1
+description: Convert configuration data and generate Puppet EPP templates
+executable: bin/convert
+commands:
+  template:
+    description: Generate EPP parameters and defaults from a configuration file
+    options:
+      -i:
+        completion: file
+      --input:
+        completion: file
+      -o:
+        completion: file
+      --output:
+        completion: file
+      -f:
+        completion: enum
+        values: [yaml, json, xml, properties, puppet-hash]
+      --input-format:
+        completion: enum
+        values: [yaml, json, xml, properties, puppet-hash]
+      -h:
+        completion: none
+      --help:
+        completion: none

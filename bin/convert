@@ -1,0 +1,43 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+# SPDX-License-Identifier: AGPL-3.0-only
+
+begin
+  require 'optparse'
+  require_relative '../lib/convert'
+
+  template = ARGV.first == 'template'
+  ARGV.shift if template
+  options = {}
+  parser = OptionParser.new do |cli|
+    cli.banner = 'Usage: convert [template] -i FILE [-o FILE] [-f FORMAT] [-t FORMAT]'
+    cli.separator 'Formats: yaml, json, xml, properties, puppet-hash. Default output: YAML.'
+    cli.on('-i', '--input FILE', 'Input file (required)') { |v| options[:input] = v }
+    cli.on('-o', '--output FILE', 'Output file (default: stdout)') { |v| options[:output] = v }
+    cli.on('-f', '--input-format FORMAT', 'Override input extension') { |v| options[:from] = v }
+    cli.on('-t', '--output-format FORMAT', 'Override output extension (conversion only)') { |v| options[:to] = v }
+    cli.on('-h', '--help', 'Show help') { puts cli; exit }
+  end
+  parser.parse!
+  raise ArgumentError, 'Unexpected arguments; use --help' unless ARGV.empty?
+  raise ArgumentError, 'Input file required; use -i FILE' unless options[:input]
+  raise ArgumentError, '--output-format is not used with template' if template && options[:to]
+
+  from = Convert.format(options[:from] || File.extname(options[:input]))
+  data = Convert.read(File.read(options[:input], encoding: 'UTF-8'), from)
+  output = if template
+             Convert.template(data, from)
+           else
+             to = options[:to] || (options[:output] ? File.extname(options[:output]) : 'yaml')
+             Convert.write(data, Convert.format(to))
+           end
+  options[:output] ? File.write(options[:output], output, encoding: 'UTF-8') : $stdout.write(output)
+rescue LoadError => e
+  dependency = e.path.to_s.split('/').first
+  dependency = 'psych' if dependency == 'yaml'
+  warn "Error: Missing Ruby dependency: #{dependency}\nInstall it using:\n  gem install #{dependency}"
+  exit 1
+rescue ArgumentError, OptionParser::ParseError, SystemCallError, EncodingError => e
+  warn "Error: #{e.message}"
+  exit 1
+end
