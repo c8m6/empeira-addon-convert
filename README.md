@@ -92,12 +92,16 @@ Produces parameters equivalent to:
 | -%>
 ```
 
-The generated body substitutes these variables. String expressions use Puppet's
-built-in `regsubst` to escape values for their format, so actual expressions are
-longer than a plain `<%= $server_host %>`. No Puppet stdlib module is required.
-Defaults escape quotes, backslashes, dollar signs, control characters and EPP
-delimiters. Existing literal EPP opening delimiters in the body are escaped.
-Unusual control characters such as NUL are rejected in template string values.
+The generated body uses readable EPP interpolation, for example:
+```epp
+name: "<%= $hierarchy_0_name %>"
+port: <%= $server_port %>
+```
+Hiera expressions such as `%{facts.os.name}` remain readable in parameter
+defaults. This is intentionally a simple starter template, not a complete
+escaping or serialization engine: overridden strings containing quotes,
+newlines or format-specific special characters may need manual adjustment.
+Review and validate generated templates before use. Defaults may contain secrets.
 
 Nested key paths and array indexes become parameter names. Invalid characters
 become underscores, names start with a lowercase letter, and collisions get a
