@@ -1,4 +1,5 @@
 # Scheduled version updates. Security updates are managed separately by GitHub.
+# Group routine action updates to minimize review overhead.
 version: 2
 updates:
   - package-ecosystem: "github-actions"
