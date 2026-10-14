@@ -1,0 +1,19 @@
+# Scheduled version updates. Security updates are managed separately by GitHub.
+# Group routine action updates to minimize review overhead.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+      time: "08:10"
+      timezone: "Europe/Berlin"
+    open-pull-requests-limit: 3
+    groups:
+      routine-updates:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
