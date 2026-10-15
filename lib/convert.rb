@@ -200,12 +200,19 @@ module Convert
     prefix = 'EMPEIRAVALUE'
     prefix += 'X' while data.inspect.include?(prefix)
     marked = template_values(data, [], parameters, prefix)
+    escape_name = 'empeira_string_escapes'
+    escape_name += '_x' while parameters.any? { |name, _| name == escape_name }
     body = write(marked, format).gsub('<%', '<%%')
     parameters.each_with_index do |(name, value), index|
       marker = "#{prefix}#{index}END"
       token = %w[json puppet-hash].include?(format) ? "\"#{marker}\"" : marker
       interpolation = "<%= $#{name} %>"
-      interpolation = "\"#{interpolation}\"" if value.is_a?(String) && %w[yaml json puppet-hash].include?(format)
+      if value.is_a?(String)
+        interpolation = "<%= $#{name}.split('').map |$character| { " \
+                        "$#{escape_name}[$character] ? { undef => $character, " \
+                        "default => $#{escape_name}[$character] } }.join('') %>"
+        interpolation = "\"#{interpolation}\"" if %w[yaml json puppet-hash].include?(format)
+      end
       body = body.gsub(token) { interpolation }
     end
     return body if parameters.empty?
@@ -214,7 +221,27 @@ module Convert
       type = [true, false].include?(value) ? 'Boolean' : value.class.name
       "  #{type} $#{name} = #{PuppetHash.dump(value)}"
     end
-    "<%- |\n#{declarations.join(",\n")}\n| -%>\n#{body}"
+    escapes = if parameters.any? { |_, value| value.is_a?(String) }
+                "<% $#{escape_name} = #{PuppetHash.dump(template_escapes(format))} -%>\n"
+              else
+                ''
+              end
+    "<%- |\n#{declarations.join(",\n")}\n| -%>\n#{escapes}#{body}"
+  end
+
+  def template_escapes(format)
+    case format
+    when 'xml'
+      { '&' => '&amp;', '<' => '&lt;', '>' => '&gt;', '"' => '&quot;', "'" => '&apos;' }
+    when 'properties'
+      { '\\' => '\\\\', "\n" => '\\n', "\r" => '\\r', "\t" => '\\t', "\f" => '\\f',
+        ' ' => '\\ ', '=' => '\\=', ':' => '\\:', '#' => '\\#', '!' => '\\!' }
+    else
+      escapes = (0..31).to_h { |code| [code.chr, Kernel.format('\\u%04x', code)] }
+      escapes.merge!('"' => '\\"', '\\' => '\\\\')
+      escapes['$'] = '\\$' if format == 'puppet-hash'
+      escapes
+    end
   end
 
   def template_values(data, path, parameters, prefix)

@@ -1,7 +1,7 @@
 # Project conventions
 
 This standalone Empeira API 1 addon converts configuration data and generates
-EPP templates. Keep it small: Ruby 3.2–3.4, standard libraries, plain functions,
+EPP templates. Keep it small: Ruby 3.1–4.0, standard libraries, plain functions,
 no Bundler requirement, build step, containers, install hooks or automatic gems.
 Do not evaluate input as Ruby or Puppet code. Keep the executable bit on
 `bin/convert` and the manifest compatible with Empeira's actual addon API.

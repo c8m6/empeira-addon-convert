@@ -5,7 +5,7 @@ Puppet EPP templates with typed parameters and defaults. Licensed AGPL-3.0-only.
 
 ## Installation
 
-Requires Ruby 3.2–3.4 on Linux, macOS or WSL2. In an Empeira control repository,
+Requires Ruby 3.1, 3.2, 3.3, 3.4 or 4.0 on Linux, macOS or WSL2. In an Empeira control repository,
 add this entry to the existing `.empeira.yaml`:
 
 ```yaml
@@ -93,15 +93,16 @@ Produces parameters equivalent to:
 | -%>
 ```
 
-The generated body uses readable EPP interpolation, for example:
+The generated body keeps scalar EPP interpolation, for example:
 ```epp
-name: "<%= $hierarchy_0_name %>"
 port: <%= $server_port %>
 ```
 Hiera expressions such as `%{facts.os.name}` remain readable in parameter
-defaults. This is intentionally a simple starter template, not a complete
-escaping or serialization engine: overridden strings containing quotes,
-newlines or format-specific special characters may need manual adjustment.
+defaults. Strings use a generated escape table and a `map`/`join` expression.
+String parameters are escaped for the output format when the template renders,
+including quotes, backslashes, newlines, XML entities and Puppet dollar signs.
+The generated code uses built-in Puppet collection functions and needs no stdlib
+module. Parameter names that resemble the generated escape table remain valid.
 Review and validate generated templates before use. Defaults may contain secrets.
 
 Nested key paths and array indexes become parameter names. Invalid characters
@@ -156,10 +157,16 @@ Install it yourself in your user's Ruby environment. The addon never installs
 anything or requests root access. It introduces no third-party parser gems.
 
 Run `ruby test/convert_test.rb` for eight focused checks, plus the syntax checks
-in [CONTRIBUTING.md](CONTRIBUTING.md). CI uses Ruby 3.4 without a test matrix or
-Bundler. Empeira API 1 can describe subcommand completion but has no root-option
+in [CONTRIBUTING.md](CONTRIBUTING.md). CI runs syntax checks and the complete behavioral tests on Ruby 3.1, 3.2,
+3.3, 3.4 and 4.0 without Bundler. CI explicitly installs `rexml`, which may be
+an optional Ruby gem on some installations. Empeira API 1 can describe subcommand completion but has no root-option
 schema; therefore `run` exposes conversion options for completion. The old root
 conversion syntax remains supported.
 
 Questions: [Empeira Discussions](https://github.com/c8m6/empeira/discussions).
 Security reports: [SECURITY.md](SECURITY.md).
+
+Ruby 3.1 is the minimum supported version. All five supported versions (3.1, 3.2,
+3.3, 3.4 and 4.0) run standalone behavior and actual addon/Core acceptance tests
+on Linux and macOS in regular CI. See [CONTRIBUTING.md](CONTRIBUTING.md) for
+local commands, optional dependencies and runtime/WSL2 validation limits.
