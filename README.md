@@ -5,7 +5,7 @@ Puppet EPP templates with typed parameters and defaults. Licensed AGPL-3.0-only.
 
 ## Installation
 
-Requires Ruby 3.2–3.4 on Linux, macOS or WSL2. In an Empeira control repository,
+Requires Ruby 3.1, 3.2, 3.3, 3.4 or 4.0 on Linux, macOS or WSL2. In an Empeira control repository,
 add this entry to the existing `.empeira.yaml`:
 
 ```yaml
@@ -156,8 +156,9 @@ Install it yourself in your user's Ruby environment. The addon never installs
 anything or requests root access. It introduces no third-party parser gems.
 
 Run `ruby test/convert_test.rb` for eight focused checks, plus the syntax checks
-in [CONTRIBUTING.md](CONTRIBUTING.md). CI uses Ruby 3.4 without a test matrix or
-Bundler. Empeira API 1 can describe subcommand completion but has no root-option
+in [CONTRIBUTING.md](CONTRIBUTING.md). CI runs syntax checks and the complete behavioral tests on Ruby 3.1, 3.2,
+3.3, 3.4 and 4.0 without Bundler. CI explicitly installs `rexml`, which may be
+an optional Ruby gem on some installations. Empeira API 1 can describe subcommand completion but has no root-option
 schema; therefore `run` exposes conversion options for completion. The old root
 conversion syntax remains supported.
 
