@@ -93,15 +93,16 @@ Produces parameters equivalent to:
 | -%>
 ```
 
-The generated body uses readable EPP interpolation, for example:
+The generated body keeps scalar EPP interpolation, for example:
 ```epp
-name: "<%= $hierarchy_0_name %>"
 port: <%= $server_port %>
 ```
 Hiera expressions such as `%{facts.os.name}` remain readable in parameter
-defaults. This is intentionally a simple starter template, not a complete
-escaping or serialization engine: overridden strings containing quotes,
-newlines or format-specific special characters may need manual adjustment.
+defaults. Strings use a generated escape table and a `map`/`join` expression.
+String parameters are escaped for the output format when the template renders,
+including quotes, backslashes, newlines, XML entities and Puppet dollar signs.
+The generated code uses built-in Puppet collection functions and needs no stdlib
+module. Parameter names that resemble the generated escape table remain valid.
 Review and validate generated templates before use. Defaults may contain secrets.
 
 Nested key paths and array indexes become parameter names. Invalid characters
@@ -164,3 +165,8 @@ conversion syntax remains supported.
 
 Questions: [Empeira Discussions](https://github.com/c8m6/empeira/discussions).
 Security reports: [SECURITY.md](SECURITY.md).
+
+Ruby 3.1 is the minimum supported version. All five supported versions (3.1, 3.2,
+3.3, 3.4 and 4.0) run standalone behavior and actual addon/Core acceptance tests
+on Linux and macOS in regular CI. See [CONTRIBUTING.md](CONTRIBUTING.md) for
+local commands, optional dependencies and runtime/WSL2 validation limits.

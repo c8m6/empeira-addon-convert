@@ -99,12 +99,14 @@ Dir.mktmpdir('empeira-convert-test') do |directory|
      'Boolean $server_enabled = true', 'Float $server_timeout = 30.5'].each do |declaration|
       assert(stdout.include?(declaration), declaration)
     end
-    special = { 'text' => "quote '\" slash \\ dollar $x newline\n<% tag %>", 'a-b' => [1], 'a_b_0' => 2 }
+    special = { 'text' => "quote '\" slash \\ dollar $x newline\n<% tag %> &",
+                'a-b' => [1], 'a_b_0' => 2, 'empeira_string_escapes' => 'reserved name' }
     template = Convert.template(special, 'yaml')
     assert(template.include?('$a_b_0 = 1') && template.include?('$a_b_0_2 = 2'))
     assert(template.include?('\\u0025>') && template.include?('\\$x'))
     assert(Convert.template({ 'x' => nil }, 'yaml') == YAML.dump('x' => nil))
-    assert(template.include?('"<%= $text %>"'))
+    assert(template.include?('"<%= $text.split(\'\').map |$character|'))
+    assert(template.include?('$empeira_string_escapes_x[$character]'))
     assert(!template.include?('regsubst('))
     assert(Convert.template({ 'glob' => '%{facts.os.name}' }, 'yaml').include?('"%{facts.os.name}"'))
 
