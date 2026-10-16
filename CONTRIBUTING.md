@@ -22,7 +22,7 @@ Puppet uses its distribution Ruby independently from the addon's selected Ruby.
 On hosted macOS that optional tool is absent; its tests report the EPP check as
 unavailable while still running all standalone behavior and Core acceptance.
 
-Contributions are licensed AGPL-3.0-only. Retain attribution and check the origin
+Contributions are licensed AGPL-3.0-or-later. Retain attribution and check the origin
 and compatibility of any third-party material. No CLA or copyright assignment
 is required. For questions use [Empeira Discussions](https://github.com/c8m6/empeira/discussions).
 For undisclosed vulnerabilities follow [SECURITY.md](SECURITY.md).
