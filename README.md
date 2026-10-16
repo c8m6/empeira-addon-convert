@@ -1,7 +1,7 @@
 # Empeira Addon Convert
 
 A small standalone Ruby addon for converting configuration data and generating
-Puppet EPP templates with typed parameters and defaults. Licensed AGPL-3.0-only.
+Puppet EPP templates with typed parameters and defaults. Licensed AGPL-3.0-or-later.
 
 ## Installation
 
