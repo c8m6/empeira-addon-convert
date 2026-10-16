@@ -6,7 +6,7 @@ no Bundler requirement, build step, containers, install hooks or automatic gems.
 Do not evaluate input as Ruby or Puppet code. Keep the executable bit on
 `bin/convert` and the manifest compatible with Empeira's actual addon API.
 
-Code and documentation use AGPL-3.0-only. Documentation and comments are English.
+Code and documentation use AGPL-3.0-or-later. Documentation and comments are English.
 Support Linux, macOS and WSL2; use portable Ruby file operations. Use synthetic
 test data, never production configuration or secrets. Update README examples and
 manifest completion when the interface changes. Avoid unrelated features and
